@@ -1,7 +1,7 @@
 "use client"
 
 // components/FileUpload.tsx
-import { GET } from '../app/api/route.js';
+import { POST } from '../app/api/route.js';
 import React, { useRef, useState } from "react";
 import classNames from "classnames";
 
@@ -24,8 +24,7 @@ const FileUpload = () => {
   };
 
   const handleUpload = async () => {
-    const UPLOAD_URL = "http://c8ec-47-19-124-248.ngrok-free.app/get_img";
-    const data = new FormData();
+    const UPLOAD_URL = "http://127.0.0.1:5000/get_img";
     let i = 0;
     let images = [];
     let indices = [];
@@ -53,15 +52,21 @@ const FileUpload = () => {
     console.log(images);
     console.log(indices);
   
-    data.append("images", images);
-    data.append("indices", indices);
+    console.log(images);
+    console.log(indices);
+
+    const data = {
+      "images": images,
+      "indices": indices
+    }
+
+    let response = await POST(UPLOAD_URL, data);
   
-    const jsonData = formDataToJson(data);
-    console.log(jsonData);
+    //console.log(jsonData);
 
-    const url = UPLOAD_URL + JSON.stringify(jsonData);
+    //const url = UPLOAD_URL + JSON.stringify(jsonData);
 
-    let response = await GET(url);
+    //let response = await POST(UPLOAD_URL, JSON.stringify(jsonData));
 
     console.log(response);
   };
