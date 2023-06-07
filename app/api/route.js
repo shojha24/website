@@ -12,7 +12,7 @@ export async function POST(url, data) {
       'Access-Control-Allow-Origin': '*', 
       'Access-Control-Allow-Headers': '*', 
       'Access-Control-Allow-Methods': '*',
-      //"ngrok-skip-browser-warning": "true",
+      "ngrok-skip-browser-warning": "true",
     },
   }).then((response) => {
     console.log(response)

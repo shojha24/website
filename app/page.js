@@ -1,6 +1,7 @@
 "use client"
 
 import FileUpload from "@components/Uploader"
+import FileDownload from "@components/Downloader"
 
 const Home = () => {
 
@@ -19,6 +20,7 @@ const Home = () => {
             <br className="max-md:hidden"/>
 
             <FileUpload/>
+
 
 
         </section>

@@ -4,10 +4,14 @@
 import { POST } from '../app/api/route.js';
 import React, { useRef, useState } from "react";
 import classNames from "classnames";
+import FileDownload from "./Downloader.jsx";
+import { Buffer } from 'buffer';
 
 const FileUpload = () => {
+
   const [fileList, setFileList] = useState(null);
   const [shouldHighlight, setShouldHighlight] = useState(false);
+  const [audioUrl, setAudioUrl] = useState('');
   const [progress, setProgress] = useState(0);
 
   const preventDefaultHandler = (e) => {
@@ -15,16 +19,8 @@ const FileUpload = () => {
     e.stopPropagation();
   };
 
-  const formDataToJson = (formData) => {
-    const json = {};
-    for (let [key, value] of formData.entries()) {
-        json[key] = value;
-      }
-    return json;
-  };
-
   const handleUpload = async () => {
-    const UPLOAD_URL = "http://127.0.0.1:5000/get_img";
+    const UPLOAD_URL = "https://f17f-47-19-124-248.ngrok-free.app/get_img";
     let i = 0;
     let images = [];
     let indices = [];
@@ -61,22 +57,43 @@ const FileUpload = () => {
     }
 
     let response = await POST(UPLOAD_URL, data);
-  
-    //console.log(jsonData);
 
-    //const url = UPLOAD_URL + JSON.stringify(jsonData);
+    // extract audio from response
 
-    //let response = await POST(UPLOAD_URL, JSON.stringify(jsonData));
+    let audio = response["audio"];
+    console.log(audio)
 
-    console.log(response);
+    // the audio is base64 encoded in utf-8, so we need to decode it
+    const stringBuf = Buffer.from(audio, 'utf-8'); // Ta-da
+    let decodedAudio = Buffer.from(stringBuf).toString('base64'); //atob(audio);
+    console.log(`decoded: ${decodedAudio}`)
+
+    // convert the decoded audio to a wav file
+    // create a new array of 8-bit unsigned integers
+
+    let wav = new Uint8Array(audio.length);
+    for (let i = 0; i < audio.length; i++) {
+      wav[i] = audio.charCodeAt(i);
+    }
+
+    // create a blob from the array
+    let blob = new Blob([wav], {type: "audio/wav"});
+    console.log(blob)
+
+    // create a URL for the blob
+    let url = URL.createObjectURL(blob);
+    console.log(url)
+
+    setAudioUrl(url);
   };
 
-  return (
+  return ( 
+    <section className="m-0 p-0 w-full h-60 flex flex-wrap justify-center">
     <div
       className={classNames({
-        "w-full h-56": true,
+        "w-full h-40": true,
         "p-4 grid place-content-center cursor-pointer": true,
-        "text-teal-500 rounded-lg": true,
+        "text-teal-500 font-bold rounded-lg": true,
         "border-4 border-dashed ": true,
         "transition-colors": true,
         "border-teal-500 bg-teal-100 hover:bg-teal-200 hover:border-teal-900": shouldHighlight,
@@ -115,7 +132,7 @@ const FileUpload = () => {
               return <span key={i}>{file.name}</span>;
             })}
             <div className="flex gap-2 mt-2">
-              <button className="bg-teal-500 text-teal-50 px-2 py-1 rounded-md"
+              <button className="bg-teal-500 text-teal-50 active:bg-teal-600 px-2 py-1 rounded-md"
                 onClick={() => {handleUpload()}}>
                 Upload
               </button>
@@ -132,6 +149,10 @@ const FileUpload = () => {
         )}
       </div>
     </div>
+    <div>
+    {audioUrl && <FileDownload url={audioUrl} />}
+    </div>
+    </section>
   );
 };
 
